@@ -1,4 +1,4 @@
---// NYX SCRIPT HUB - VERSION FINALE (Fly, Speed, Jump, ESP, Noclip, Godmode) //--
+--// NYX SCRIPT HUB - VERSION FINALE CORRIGÉE (Fly, Speed, Jump, ESP, Noclip, Godmode) //--
 --// Créateur : Nyx_122 //--
 
 local Players = game:GetService("Players")
@@ -254,7 +254,7 @@ local function addSlider(name, minVal, maxVal, defaultVal, callback)
 		end
 	end)
 	
-	UserInputService.InputChanged:Connect(function'input'
+	UserInputService.InputChanged:Connect(function(input)
 		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 			updateSlider(input)
 		end
@@ -383,27 +383,3 @@ addToggle("👁️ Player ESP", "Voir les joueurs à travers les murs", function
 	espEnabled = enabled
 	updateESP()
 end)
-
-Players.PlayerAdded:Connect(function(p)
-	p.CharacterAdded:Connect(function()
-		task.wait(1)
-		if espEnabled then updateESP() end
-	end)
-end)
-
--- 7. FPS BOOST
-addToggle("🚀 FPS Boost", "Supprime les ombres et optimise le jeu", function(enabled)
-	if enabled then
-		Lighting.GlobalShadows = false
-		Lighting.FogEnd = 9e9
-		for _, v in ipairs(workspace:GetDescendants()) do
-			if v:IsA("ParticleEmitter") or v:IsA("Trail") then
-				v.Enabled = false
-			end
-		end
-	else
-		Lighting.GlobalShadows = true
-	end
-end)
-
-print("Nyx Hub complet chargé avec succès !")
