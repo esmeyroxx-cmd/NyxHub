@@ -1,4 +1,4 @@
---// NYX SCRIPT HUB - LOADSTRING VERSION //--
+--// NYX SCRIPT HUB - VERSION FINALE (Fly, Speed, Jump, ESP, Noclip, Godmode) //--
 --// Créateur : Nyx_122 //--
 
 local Players = game:GetService("Players")
@@ -22,8 +22,8 @@ screenGui.Parent = playerGui
 
 -- Fenêtre principale (Design sombre & rouge Nyx)
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 450, 0, 340)
-mainFrame.Position = UDim2.new(0.5, -225, 0.5, -170)
+mainFrame.Size = UDim2.new(0, 450, 0, 390)
+mainFrame.Position = UDim2.new(0.5, -225, 0.5, -195)
 mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -80,7 +80,7 @@ closeBtn.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
 
--- Corps de la fenêtre (ScrollingFrame pour les modules)
+-- Corps de la fenêtre (ScrollingFrame)
 local container = Instance.new("ScrollingFrame")
 container.Size = UDim2.new(1, -20, 1, -55)
 container.Position = UDim2.new(0, 10, 0, 48)
@@ -98,7 +98,7 @@ listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 	container.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 10)
 end)
 
--- Fonction pour créer les boutons d'activation (Toggles)
+--// FONCTION TOGGLE (ON/OFF) //--
 local function addToggle(name, desc, callback)
 	local state = false
 	
@@ -161,14 +161,162 @@ local function addToggle(name, desc, callback)
 	end)
 end
 
---// AJOUT DES FONCTIONNALITÉS DU HUB //--
+--// FONCTION SLIDER //--
+local function addSlider(name, minVal, maxVal, defaultVal, callback)
+	local currentVal = defaultVal
+	local dragging = false
+	
+	local card = Instance.new("Frame")
+	card.Size = UDim2.new(1, -6, 0, 62)
+	card.BackgroundColor3 = Color3.fromRGB(25, 25, 36)
+	card.BorderSizePixel = 0
+	card.Parent = container
+	
+	local cardCorner = Instance.new("UICorner")
+	cardCorner.CornerRadius = UDim.new(0, 8)
+	cardCorner.Parent = card
+	
+	local tLabel = Instance.new("TextLabel")
+	tLabel.Size = UDim2.new(1, -80, 0, 22)
+	tLabel.Position = UDim2.new(0, 12, 0, 6)
+	tLabel.BackgroundTransparency = 1
+	tLabel.Text = name
+	tLabel.TextColor3 = Color3.new(1, 1, 1)
+	tLabel.Font = Enum.Font.GothamBold
+	tLabel.TextSize = 14
+	tLabel.TextXAlignment = Enum.TextXAlignment.Left
+	tLabel.Parent = card
+	
+	local valLabel = Instance.new("TextLabel")
+	valLabel.Size = UDim2.new(0, 50, 0, 22)
+	valLabel.Position = UDim2.new(1, -62, 0, 6)
+	valLabel.BackgroundTransparency = 1
+	valLabel.Text = tostring(defaultVal)
+	valLabel.TextColor3 = Color3.fromRGB(220, 50, 65)
+	valLabel.Font = Enum.Font.GothamBold
+	valLabel.TextSize = 14
+	valLabel.TextXAlignment = Enum.TextXAlignment.Right
+	valLabel.Parent = card
+	
+	local track = Instance.new("TextButton")
+	track.Size = UDim2.new(1, -24, 0, 8)
+	track.Position = UDim2.new(0, 12, 0, 38)
+	track.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+	track.Text = ""
+	track.AutoButtonColor = false
+	track.Parent = card
+	
+	local trackCorner = Instance.new("UICorner")
+	trackCorner.CornerRadius = UDim.new(1, 0)
+	trackCorner.Parent = track
+	
+	local fill = Instance.new("Frame")
+	local startPercent = (defaultVal - minVal) / (maxVal - minVal)
+	fill.Size = UDim2.new(startPercent, 0, 1, 0)
+	fill.BackgroundColor3 = Color3.fromRGB(180, 30, 45)
+	fill.BorderSizePixel = 0
+	fill.Parent = track
+	
+	local fillCorner = Instance.new("UICorner")
+	fillCorner.CornerRadius = UDim.new(1, 0)
+	fillCorner.Parent = fill
+	
+	local knob = Instance.new("Frame")
+	knob.Size = UDim2.new(0, 16, 0, 16)
+	knob.Position = UDim2.new(1, -8, 0.5, -8)
+	knob.BackgroundColor3 = Color3.new(1, 1, 1)
+	knob.Parent = fill
+	
+	local knobCorner = Instance.new("UICorner")
+	knobCorner.CornerRadius = UDim.new(1, 0)
+	knobCorner.Parent = knob
+	
+	local function updateSlider(input)
+		local pos = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
+		fill.Size = UDim2.new(pos, 0, 1, 0)
+		currentVal = math.floor(minVal + ((maxVal - minVal) * pos))
+		valLabel.Text = tostring(currentVal)
+		callback(currentVal)
+	end
+	
+	track.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			mainFrame.Draggable = false
+			updateSlider(input)
+		end
+	end)
+	
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = false
+			mainFrame.Draggable = true
+		end
+	end)
+	
+	UserInputService.InputChanged:Connect(function'input'
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			updateSlider(input)
+		end
+	end)
+end
 
--- 1. FLY
+--// MODULES //--
+
+-- 1. WalkSpeed Slider
+addSlider("⚡ WalkSpeed (Vitesse)", 16, 250, 16, function(val)
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	if hum then hum.WalkSpeed = val end
+end)
+
+-- 2. JumpPower Slider
+addSlider("🦘 JumpPower (Saut)", 50, 300, 50, function(val)
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.UseJumpPower = true
+		hum.JumpPower = val
+	end
+end)
+
+-- 3. NOCLIP
+local noclipEnabled = false
+RunService.Stepped:Connect(function()
+	if noclipEnabled and player.Character then
+		for _, part in ipairs(player.Character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end
+end)
+
+addToggle("👻 Noclip", "Traverser les murs et les objets", function(enabled)
+	noclipEnabled = enabled
+end)
+
+-- 4. GODMODE (Anti-mort / Reset des dégâts)
+local godmodeEnabled = false
+RunService.Heartbeat:Connect(function()
+	if godmodeEnabled and player.Character then
+		local hum = player.Character:FindFirstChildOfClass("Humanoid")
+		if hum then
+			hum.Health = hum.MaxHealth
+		end
+	end
+end)
+
+addToggle("🛡️ Godmode", "Invincibilité (vie toujours pleine)", function(enabled)
+	godmodeEnabled = enabled
+end)
+
+-- 5. FLY MODE
 local flying = false
 local flySpeed = 50
 local bodyGyro, bodyVel
 
-addToggle("✈️ Fly Mode", "Permet de voler librement dans le jeu", function(enabled)
+addToggle("✈️ Fly Mode", "Permet de voler librement", function(enabled)
 	flying = enabled
 	local char = player.Character
 	local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -209,16 +357,7 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
--- 2. SPEED
-addToggle("⚡ Super Speed", "Augmente la vitesse à 50", function(enabled)
-	local char = player.Character
-	local hum = char and char:FindFirstChildOfClass("Humanoid")
-	if hum then
-		hum.WalkSpeed = enabled and 50 or 16
-	end
-end)
-
--- 3. ESP
+-- 6. ESP
 local espEnabled = false
 local function updateESP()
 	for _, p in ipairs(Players:GetPlayers()) do
@@ -240,7 +379,7 @@ local function updateESP()
 	end
 end
 
-addToggle("👁️ Player ESP", "Avoit les joueurs à travers les murs", function(enabled)
+addToggle("👁️ Player ESP", "Voir les joueurs à travers les murs", function(enabled)
 	espEnabled = enabled
 	updateESP()
 end)
@@ -252,7 +391,7 @@ Players.PlayerAdded:Connect(function(p)
 	end)
 end)
 
--- 4. FPS BOOST
+-- 7. FPS BOOST
 addToggle("🚀 FPS Boost", "Supprime les ombres et optimise le jeu", function(enabled)
 	if enabled then
 		Lighting.GlobalShadows = false
@@ -267,4 +406,4 @@ addToggle("🚀 FPS Boost", "Supprime les ombres et optimise le jeu", function(e
 	end
 end)
 
-print("Nyx Hub chargé avec succès !")
+print("Nyx Hub complet chargé avec succès !")
